@@ -282,6 +282,10 @@ async def drm_handler(bot: Client, m: Message):
                         name = f'{str(count).zfill(3)}) {name1[:60]} {endfilename}'
                         namef = f'{name1[:60]} {endfilename}'
                         
+            # Sanitize filenames to prevent FFmpeg errors with spaces and special chars
+            name = name.replace(" ", "_").replace("[", "").replace("]", "").replace("(", "").replace(")", "")
+            namef = namef.replace(" ", "_").replace("[", "").replace("]", "").replace("(", "").replace(")", "")
+                    
 #........................................................................................................................................................................................
             if "visionias" in url:
                 async with ClientSession() as session:
