@@ -536,11 +536,14 @@ async def drm_handler(bot: Client, m: Message):
                     else:
                         try:
                             cmd = f'yt-dlp -o "{namef}.pdf" "{url}"'
-                            download_cmd = f"{cmd} -R 25 --fragment-retries 25"
+                            # Sanitize filename for PDF
+                            safe_namef = namef.replace('"', '').replace("\'", '').replace('\\', '').strip()[:200]
+                            cmd = f'yt-dlp -o "{safe_namef}.pdf" "{url}"'
+                            download_cmd = f"{cmd} --retries 25 --fragment-retries 25"
                             os.system(download_cmd)
-                            copy = await bot.send_document(chat_id=channel_id, document=f'{namef}.pdf', caption=cc1)
+                            copy = await bot.send_document(chat_id=channel_id, document=f'{safe_namef}.pdf', caption=cc1)
                             count += 1
-                            os.remove(f'{namef}.pdf')
+                            os.remove(f'{safe_namef}.pdf')
                         except FloodWait as e:
                             await m.reply_text(str(e))
                             time.sleep(e.x)
@@ -550,7 +553,10 @@ async def drm_handler(bot: Client, m: Message):
                     try:
                         ext = url.split('.')[-1]
                         cmd = f'yt-dlp -o "{namef}.{ext}" "{url}"'
-                        download_cmd = f"{cmd} -R 25 --fragment-retries 25"
+                        # Sanitize filename for PDF
+                        safe_namef = namef.replace('"', '').replace("\'", '').replace('\\', '').strip()[:200]
+                        cmd = f'yt-dlp -o "{safe_namef}.pdf" "{url}"'
+                        download_cmd = f"{cmd} --retries 25 --fragment-retries 25"
                         os.system(download_cmd)
                         copy = await bot.send_photo(chat_id=channel_id, photo=f'{namef}.{ext}', caption=ccimg)
                         count += 1
@@ -564,7 +570,10 @@ async def drm_handler(bot: Client, m: Message):
                     try:
                         ext = url.split('.')[-1]
                         cmd = f'yt-dlp -o "{namef}.{ext}" "{url}"'
-                        download_cmd = f"{cmd} -R 25 --fragment-retries 25"
+                        # Sanitize filename for PDF
+                        safe_namef = namef.replace('"', '').replace("\'", '').replace('\\', '').strip()[:200]
+                        cmd = f'yt-dlp -o "{safe_namef}.pdf" "{url}"'
+                        download_cmd = f"{cmd} --retries 25 --fragment-retries 25"
                         os.system(download_cmd)
                         copy = await bot.send_document(chat_id=channel_id, document=f'{namef}.{ext}', caption=ccm)
                         count += 1
@@ -624,7 +633,21 @@ async def drm_handler(bot: Client, m: Message):
     video_count = v2_count + mpd_count + m3u8_count + yt_count + drm_count + zip_count + other_count
     if m.document:
         if raw_text7 == "/d":
-            await bot.send_message(channel_id, f"<b>-┈━═.•°✅ Completed ✅°•.═━┈-</b>\n<blockquote><b>🎯Batch Name : {b_name}</b></blockquote>\n<blockquote>🔗 Total URLs: {len(links)} \n┃   ┠🔴 Total Failed URLs: {failed_count}\n┃   ┠🟢 Total Successful URLs: {success_count}\n┃   ┃   ┠🎥 Total Video URLs: {video_count}\n┃   ┃   ┠📄 Total PDF URLs: {pdf_count}\n┃   ┃   ┠📸 Total IMAGE URLs: {img_count}</blockquote>\n")
+            try:
+                await bot.send_message(channel_id, f"<b>-┈━═.•°✅ Completed ✅°•.═━┈-</b>\n<blockquote><b>🎯Batch Name : {b_name}</b></blockquote>\n<blockquote>🔗 Total URLs: {len(links)} \n┃   ┠🔴 Total Failed URLs: {failed_count}\n┃   ┠🟢 Total Successful URLs: {success_count}\n┃   ┃   ┠🎥 Total Video URLs: {video_count}\n┃   ┃   ┠📄 Total PDF URLs: {pdf_count}\n┃   ┃   ┠📸 Total IMAGE URLs: {img_count}</blockquote>\n")
+                else:
+                await bot.send_message(channel_id, f"<b>-┈━═.•°✅ Completed ✅°•.═━┈-</b>\n<blockquote><b>🎯Batch Name : {b_name}</b></blockquote>\n<blockquote>🔗 Total URLs: {len(links)} \n┃   ┠🔴 Total Failed URLs: {failed_count}\n┃   ┠🟢 Total Successful URLs: {success_count}\n┃   ┃   ┠🎥 Total Video URLs: {video_count}\n┃   ┃   ┠📄 Total PDF URLs: {pdf_count}\n┃   ┃   ┠📸 Total IMAGE URLs: {img_count}</blockquote>\n")
+                await bot.send_message(m.chat.id, f"<blockquote><b>✅ Your Task is completed, please check your Set Channel📱</b></blockquote>")
+            except PeerIdInvalid:
+                await bot.send_message(m.chat.id, f"<b>✅ Task Completed!</b>\n\n<blockquote>Batch: {b_name}\nTotal: {len(links)}\nSuccess: {success_count}\nFailed: {failed_count}</blockquote>\n\n⚠️ <i>Could not send to channel. Make sure bot is admin.</i>")
+            except Exception as e:
+                await bot.send_message(m.chat.id, f"<b>✅ Task Completed!</b>\n\nBatch: {b_name}\nTotal: {len(links)}\nSuccess: {success_count}\n\n<i>Error: {str(e)}</i>")
         else:
-            await bot.send_message(channel_id, f"<b>-┈━═.•°✅ Completed ✅°•.═━┈-</b>\n<blockquote><b>🎯Batch Name : {b_name}</b></blockquote>\n<blockquote>🔗 Total URLs: {len(links)} \n┃   ┠🔴 Total Failed URLs: {failed_count}\n┃   ┠🟢 Total Successful URLs: {success_count}\n┃   ┃   ┠🎥 Total Video URLs: {video_count}\n┃   ┃   ┠📄 Total PDF URLs: {pdf_count}\n┃   ┃   ┠📸 Total IMAGE URLs: {img_count}</blockquote>\n")
+            try:
+                await bot.send_message(channel_id, f"<b>-┈━═.•°✅ Completed ✅°•.═━┈-</b>\n<blockquote><b>🎯Batch Name : {b_name}</b></blockquote>\n<blockquote>🔗 Total URLs: {len(links)} \n┃   ┠🔴 Total Failed URLs: {failed_count}\n┃   ┠🟢 Total Successful URLs: {success_count}\n┃   ┃   ┠🎥 Total Video URLs: {video_count}\n┃   ┃   ┠📄 Total PDF URLs: {pdf_count}\n┃   ┃   ┠📸 Total IMAGE URLs: {img_count}</blockquote>\n")
+                await bot.send_message(m.chat.id, f"<blockquote><b>✅ Your Task is completed, please check your Set Channel📱</b></blockquote>")
+            except PeerIdInvalid:
+                await bot.send_message(m.chat.id, f"<b>✅ Task Completed!</b>\n\n<blockquote>Batch: {b_name}\nTotal: {len(links)}\nSuccess: {success_count}\nFailed: {failed_count}</blockquote>\n\n⚠️ <i>Could not send to channel. Make sure bot is admin.</i>")
+            except Exception as e:
+                await bot.send_message(m.chat.id, f"<b>✅ Task Completed!</b>\n\nBatch: {b_name}\nTotal: {len(links)}\nSuccess: {success_count}\n\n<i>Error: {str(e)}</i>")
             await bot.send_message(m.chat.id, f"<blockquote><b>✅ Your Task is completed, please check your Set Channel📱</b></blockquote>")
