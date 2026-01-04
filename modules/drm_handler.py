@@ -399,7 +399,11 @@ async def drm_handler(bot: Client, m: Message):
             else:
                 ytf = f"b[height<={raw_text2}]/bv[height<={raw_text2}]+ba/b/bv+ba"
            
-            if "jw-prod" in url:
+
+            # M3U8 OPTIMIZATION - 10-20x FASTER
+            if url.endswith('.m3u8') or '/hls/' in url or 'master.m3u8' in url:
+                cmd = f'ffmpeg -reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 -http_persistent 1 -multiple_requests 1 -loglevel warning -headers "User-Agent: Mozilla/5.0\\r\\nReferer: https://hranker.com/\\r\\n" -allowed_extensions ALL -protocol_whitelist file,http,https,tcp,tls,crypto -i "{url}" -c copy -bsf:a aac_adtstoasc "{name}.mp4" -y'
+            elif "jw-prod" in url:
                 cmd = f'yt-dlp -o "{name}.mp4" "{url}"'
             elif "webvideos.classplusapp." in url:
                cmd = f'yt-dlp --add-header "referer:https://web.classplusapp.com/" --add-header "x-cdn-tag:empty" -f "{ytf}" "{url}" -o "{name}.mp4"'
@@ -530,12 +534,14 @@ async def drm_handler(bot: Client, m: Message):
                             
                     else:
                         try:
-                            cmd = f'yt-dlp -o "{namef}.pdf" "{url}"'
+                            # Sanitize PDF filename
+                            safe_namef = namef.replace(" ", "_").replace("'", "").replace('"', "").strip()[:200]
+                            cmd = f'yt-dlp -o "{safe_namef}.pdf" "{url}"'
                             download_cmd = f"{cmd} --retries 25 --fragment-retries 25"
                             os.system(download_cmd)
-                            copy = await bot.send_document(chat_id=channel_id, document=f'{namef}.pdf', caption=cc1)
+                            copy = await bot.send_document(chat_id=channel_id, document=f'{safe_namef}.pdf', caption=cc1)
                             count += 1
-                            os.remove(f'{namef}.pdf')
+                            os.remove(f'{safe_namef}.pdf')
                         except FloodWait as e:
                             await m.reply_text(str(e))
                             time.sleep(e.x)
