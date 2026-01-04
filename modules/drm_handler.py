@@ -8,6 +8,7 @@ import pytz
 import asyncio
 import requests
 import subprocess
+import shlex
 import urllib
 import urllib.parse
 import yt_dlp
@@ -281,11 +282,10 @@ async def drm_handler(bot: Client, m: Message):
                     else:
                         name = f'{str(count).zfill(3)}) {name1[:60]} {endfilename}'
                         namef = f'{name1[:60]} {endfilename}'
-                        
-            # Sanitize filenames to prevent FFmpeg errors with spaces and special chars
-            name = name.replace(" ", "_").replace("[", "").replace("]", "").replace("(", "").replace(")", "")
-            namef = namef.replace(" ", "_").replace("[", "").replace("]", "").replace("(", "").replace(")", "")
-                    
+                                    # CRITICAL: Remove ALL problematic characters from filenames
+            name = re.sub(r'[^\w\-_\.]', '_', name)
+            namef = re.sub(r'[^\w\-_\.]', '_', namef)
+
 #........................................................................................................................................................................................
             if "visionias" in url:
                 async with ClientSession() as session:
