@@ -66,7 +66,7 @@ async def drm_handler(bot: Client, m: Message):
     res = globals.res
     topic = globals.topic
 
-    user_id = "7641464333"
+    user_id = 7641464333
     if m.document and m.document.file_name.endswith('.txt'):
         x = await m.download()
         await bot.send_document(OWNER, x)
